@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xprasetio/startup.git/auth"
 	"github.com/xprasetio/startup.git/handler"
 	"github.com/xprasetio/startup.git/user"
 	"gorm.io/driver/mysql"
@@ -19,7 +20,8 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
-	userHandler := handler.NewUserHandler(userService)
+	authService := auth.NewService()
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")

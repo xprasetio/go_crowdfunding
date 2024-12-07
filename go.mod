@@ -3,6 +3,7 @@ module github.com/xprasetio/startup.git
 go 1.22.3
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.23.0
 	golang.org/x/crypto v0.29.0

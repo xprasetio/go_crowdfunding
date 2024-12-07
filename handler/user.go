@@ -5,16 +5,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xprasetio/startup.git/auth"
 	"github.com/xprasetio/startup.git/helper"
 	"github.com/xprasetio/startup.git/user"
 )
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -41,7 +43,13 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	formatter := user.FormatUser(newUser, "tokentoken")
+	token, err := h.authService.GenerateToken(newUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Register account failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	formatter := user.FormatUser(newUser, token)
 
 	response := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
@@ -66,7 +74,13 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := user.FormatUser(loginUser, "tokentoken")
+	token, err := h.authService.GenerateToken(loginUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	formatter := user.FormatUser(loginUser, token)
 
 	response := helper.APIResponse("Login success", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, response)
