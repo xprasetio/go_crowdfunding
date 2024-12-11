@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/xprasetio/startup.git/auth"
+	"github.com/xprasetio/startup.git/campaign"
 	"github.com/xprasetio/startup.git/handler"
 	"github.com/xprasetio/startup.git/helper"
 	"github.com/xprasetio/startup.git/user"
@@ -26,6 +28,12 @@ func main() {
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 	userHandler := handler.NewUserHandler(userService, authService)
+
+	campaignRepository := campaign.NewRepository(db)
+	campaigns, err := campaignRepository.FindAll()
+	for _, campaign := range campaigns {
+		fmt.Println(campaign.Name)
+	}
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
