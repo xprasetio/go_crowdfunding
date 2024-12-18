@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -24,16 +23,23 @@ func main() {
 		log.Fatal("Error connecting to database: ", err)
 	}
 
+	/* START REPOSITORY */
 	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository)
-	authService := auth.NewService()
-	userHandler := handler.NewUserHandler(userService, authService)
-
 	campaignRepository := campaign.NewRepository(db)
-	campaigns, err := campaignRepository.FindAll()
-	for _, campaign := range campaigns {
-		fmt.Println(campaign.Name)
-	}
+	/* END REPOSITORY */
+
+	/* START SERVICE */
+	userService := user.NewService(userRepository)
+	campaignService := campaign.NewService(campaignRepository)
+	authService := auth.NewService()
+	/* END SERVICE  */
+
+	/* START HANDLER */
+	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
+	/* END HANDLER */
+
+	
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -42,6 +48,7 @@ func main() {
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 
 	router.Run(":8088")
 }
