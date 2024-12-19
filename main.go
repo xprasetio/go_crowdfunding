@@ -42,6 +42,7 @@ func main() {
 	
 
 	router := gin.Default()
+	router.Static("/images", "./images") // untuk melihat gambar dari link url
 	api := router.Group("/api/v1")
 
 	api.POST("/users", userHandler.RegisterUser)
